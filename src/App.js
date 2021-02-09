@@ -1,25 +1,49 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { Switch, Route, Redirect } from 'react-router-dom'
+import {connect} from 'react-redux'
+import 'react-toastify/dist/ReactToastify.css'
+import { ToastContainer, Slide } from 'react-toastify'
 
-function App() {
+import AuthPage from './pages/authpage.component';
+import EditNotePage from './pages/editnotepage.component';
+import NotesPage from './pages/notespage.component';
+import Header from './components/header.component'
+import Spinner from './components/spinner/spinner.component';
+import { logoutUser } from './redux/actions/authActionCreators'
+
+const App = ({ user, dispatchLogoutAction }) => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <React.Fragment>
+        <ToastContainer position="top-right" autoClose={2000}
+          hideProgressBar transition={Slide}
+        />
+        <Spinner />
+        <Header isLoggedIn={user.isLoggedIn} userName={user.fullName}
+            onLogout={dispatchLogoutAction} />
+        <div className="container my-5">
+          {!user.isLoggedIn ?
+          (<Switch>
+            <Route exact path="/auth" component={AuthPage} /> 
+            <Redirect to="/auth" />
+          </Switch>):
+          (<Switch>
+            <Route exact path="/notes" component={NotesPage}/>
+            <Route exact path="/edit-note" component={EditNotePage}/>
+            <Route exact path="/edit-note/:noteId" component={EditNotePage}/>
+            <Redirect to="/notes" />
+          </Switch>)
+          }
+        </div>
+    </React.Fragment>
+    
+  )
 }
 
-export default App;
+const mapStateToProps = (state) => ({
+  user: state.user
+})
+const mapDispatchToProps = (dispatch) => ({
+  dispatchLogoutAction: () => dispatch(logoutUser())
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);

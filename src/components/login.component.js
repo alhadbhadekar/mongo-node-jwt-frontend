@@ -8,12 +8,31 @@ const LoginForm = ({ dispatchLoginAction }) => {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState({ email: false, password: false})
 
     const handleOnSubmit = (event) => {
         event.preventDefault()
-        dispatchLoginAction(email, password, 
+        if(ifFormInvalid()) updateErrorFlags()
+        else dispatchLoginAction(email, password, 
             () => toast.success("Logged in successfully"),
             (message) => toast.error(`Error: ${message}`))
+    }
+
+    const handleCancelForm = event => {
+        event.preventDefault()
+        setEmail('')
+        setPassword('')
+        setError({ email: false, password: false })
+    }
+
+    const ifFormInvalid = () => (!email || !password)
+
+    const updateErrorFlags = () => {
+        const errObj = { email: false, password: false}
+        // if email is blank or not present toggle email flag, same for password
+        if(!email.trim()) errObj.email = true;
+        if(!password.trim()) errObj.password = true;
+        setError(errObj)
     }
 
     return (
@@ -29,8 +48,9 @@ const LoginForm = ({ dispatchLoginAction }) => {
                         placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="form-control"
+                        className={`form-control ${error.email ? 'is-invalid' : ''}`}
                     />
+                    <p className="invalid-feedback">Required</p>
                 </div>
                 <div className="form-group">
                 <   label htmlFor="password">Password</label>
@@ -40,13 +60,14 @@ const LoginForm = ({ dispatchLoginAction }) => {
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="form-control"
+                        className={`form-control ${error.password ? 'is-invalid' : ''}`}
                     />
+                    <p className="invalid-feedback">Required</p>
                 </div>
                 <button type="submit" className="btn btn-primary mr-2">
                     Login | <i className="fas fa-sign-in-alt"></i>
                 </button>
-                <button type="submit" className="btn btn-outline-secondary">
+                <button onClick={handleCancelForm} type="submit" className="btn btn-outline-secondary">
                     Cancel | <i className="fas fa-times"></i>
                 </button>
             </form>
